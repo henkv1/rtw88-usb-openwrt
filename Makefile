@@ -21,6 +21,10 @@ STAMP_CONFIGURED_DEPENDS := $(STAGING_DIR)/usr/include/mac80211-backport/backpor
 include $(INCLUDE_DIR)/kernel.mk
 include $(INCLUDE_DIR)/package.mk
 
+RTW_AUTOLOAD := rtw_8821cu \
+		rtw_8822bu \
+		rtw_8822cu
+
 define KernelPackage/rtw88-usb
   SUBMENU:=Wireless Drivers
   TITLE:= Realtek RTL8822CU AP Mode
@@ -34,8 +38,7 @@ define KernelPackage/rtw88-usb
 	$(PKG_BUILD_DIR)/rtw_8822bu.ko \
 	$(PKG_BUILD_DIR)/rtw_8821c.ko \
 	$(PKG_BUILD_DIR)/rtw_8821cu.ko
-  AUTOLOAD:=$(call AutoProbe, rtw_8821cu)
-  AUTOLOAD:=$(call AutoProbe, rtw_8822bu)
+  AUTOLOAD:=$(call AutoLoad,50,$(RTW_AUTOLOAD))
 endef
 
 NOSTDINC_FLAGS = \
