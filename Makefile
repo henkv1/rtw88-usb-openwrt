@@ -23,7 +23,9 @@ include $(INCLUDE_DIR)/package.mk
 
 RTW_AUTOLOAD := rtw_8821cu \
 		rtw_8822bu \
-		rtw_8822cu
+		rtw_8822cu \
+		rtw_8812au \
+		rtw_8821au
 
 define KernelPackage/rtw88-usb
   SUBMENU:=Wireless Drivers
@@ -37,7 +39,10 @@ define KernelPackage/rtw88-usb
 	$(PKG_BUILD_DIR)/rtw_8822b.ko \
 	$(PKG_BUILD_DIR)/rtw_8822bu.ko \
 	$(PKG_BUILD_DIR)/rtw_8821c.ko \
-	$(PKG_BUILD_DIR)/rtw_8821cu.ko
+	$(PKG_BUILD_DIR)/rtw_8821cu.ko \
+	$(PKG_BUILD_DIR)/rtw_8821a.ko \
+	$(PKG_BUILD_DIR)/rtw_8821au.ko \
+	$(PKG_BUILD_DIR)/rtw_8812au.ko
   AUTOLOAD:=$(call AutoLoad,50,$(RTW_AUTOLOAD))
 endef
 
