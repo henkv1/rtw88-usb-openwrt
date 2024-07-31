@@ -34,7 +34,8 @@ define KernelPackage/rtw88-usb
 	$(PKG_BUILD_DIR)/rtw_8822bu.ko \
 	$(PKG_BUILD_DIR)/rtw_8821c.ko \
 	$(PKG_BUILD_DIR)/rtw_8821cu.ko
-  AUTOLOAD:=$(call AutoProbe, rtw_8821cu, rtw_8822bu)
+  AUTOLOAD:=$(call AutoProbe, rtw_8821cu)
+  AUTOLOAD:=$(call AutoProbe, rtw_8822bu)
 endef
 
 NOSTDINC_FLAGS = \

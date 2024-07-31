@@ -96,14 +96,6 @@ Alleen in rtw88/: .git
 diff -u rtw88/mac80211.c rtw88-usb-HEAD/mac80211.c
 --- rtw88/mac80211.c	2024-07-24 14:56:34.824191142 +0200
 +++ rtw88-usb-HEAD/mac80211.c	2024-07-24 14:48:55.143793043 +0200
-@@ -12,7 +12,6 @@
- #include "reg.h"
- #include "bf.h"
- #include "debug.h"
--#include "wow.h"
- #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
- #include "sar.h"
- #endif
 @@ -365,7 +364,7 @@
  static void rtw_ops_bss_info_changed(struct ieee80211_hw *hw,
  				     struct ieee80211_vif *vif,
@@ -158,77 +150,15 @@ diff -u rtw88/mac80211.c rtw88-usb-HEAD/mac80211.c
  			   unsigned int link_id, u16 ac,
  #else
  			   u16 ac,
-@@ -732,11 +731,11 @@
+@@ -732,7 +731,7 @@
  #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 18, 0)
  static void rtw_ops_mgd_prepare_tx(struct ieee80211_hw *hw,
  				   struct ieee80211_vif *vif,
 -    #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0))
-+//    #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0)) || defined(OPENWRT)
++    #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0)) || defined(OPENWRT)
  				   struct ieee80211_prep_tx_info *info)
--    #else
--				   u16 duration)
--    #endif
-+ //   #else
-+//				   u16 duration)
-+// #endif
- #else
- static void rtw_ops_mgd_prepare_tx(struct ieee80211_hw *hw,
- 				   struct ieee80211_vif *vif)
-@@ -870,43 +869,6 @@
- 	return 0;
- }
- 
--#ifdef CONFIG_PM
--static int rtw_ops_suspend(struct ieee80211_hw *hw,
--			   struct cfg80211_wowlan *wowlan)
--{
--	struct rtw_dev *rtwdev = hw->priv;
--	int ret;
--
--	mutex_lock(&rtwdev->mutex);
--	ret = rtw_wow_suspend(rtwdev, wowlan);
--	if (ret)
--		rtw_err(rtwdev, "failed to suspend for wow %d\n", ret);
--	mutex_unlock(&rtwdev->mutex);
--
--	return ret ? 1 : 0;
--}
--
--static int rtw_ops_resume(struct ieee80211_hw *hw)
--{
--	struct rtw_dev *rtwdev = hw->priv;
--	int ret;
--
--	mutex_lock(&rtwdev->mutex);
--	ret = rtw_wow_resume(rtwdev);
--	if (ret)
--		rtw_err(rtwdev, "failed to resume for wow %d\n", ret);
--	mutex_unlock(&rtwdev->mutex);
--
--	return ret ? 1 : 0;
--}
--
--static void rtw_ops_set_wakeup(struct ieee80211_hw *hw, bool enabled)
--{
--	struct rtw_dev *rtwdev = hw->priv;
--
--	device_set_wakeup_enable(rtwdev->dev, enabled);
--}
--#endif
- 
- static void rtw_reconfig_complete(struct ieee80211_hw *hw,
- 				  enum ieee80211_reconfig_type reconfig_type)
-@@ -1028,10 +990,5 @@
- #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
- 	.set_sar_specs          = rtw_ops_set_sar_specs,
- #endif
--#ifdef CONFIG_PM
--	.suspend		= rtw_ops_suspend,
--	.resume			= rtw_ops_resume,
--	.set_wakeup		= rtw_ops_set_wakeup,
--#endif
- };
- EXPORT_SYMBOL(rtw_ops);
+    #else
+				   u16 duration)
 diff -u rtw88/main.c rtw88-usb-HEAD/main.c
 --- rtw88/main.c	2024-07-24 14:56:34.824191142 +0200
 +++ rtw88-usb-HEAD/main.c	2024-07-24 14:48:55.143793043 +0200
