@@ -1,7 +1,7 @@
-Gemeenschappelijke submappen: rtw88/alt_rtl8821ce en rtw88-usb-HEAD/alt_rtl8821ce
-diff -u rtw88/bf.c rtw88-usb-HEAD/bf.c
---- rtw88/bf.c	2024-07-24 14:56:34.818190940 +0200
-+++ rtw88-usb-HEAD/bf.c	2024-07-24 14:48:55.142793009 +0200
+Gemeenschappelijke submappen: rtw88/alt_rtl8821ce en rtw88-b/alt_rtl8821ce
+diff -u rtw88/bf.c rtw88-b/bf.c
+--- rtw88/bf.c	2024-08-06 10:48:39.806044892 +0200
++++ rtw88-b/bf.c	2024-08-06 10:49:52.707677365 +0200
 @@ -57,7 +57,7 @@
  	}
  
@@ -20,12 +20,10 @@ diff -u rtw88/bf.c rtw88-usb-HEAD/bf.c
  		bfee->aid = vif->cfg.aid;
  #else
  		bfee->aid = bss_conf->aid;
-Alleen in rtw88-usb-HEAD/: .built_check
-Alleen in rtw88-usb-HEAD/: .configured_68b329da9893e34099c7d8ad5cb9c940
-Gemeenschappelijke submappen: rtw88/firmware en rtw88-usb-HEAD/firmware
-diff -u rtw88/fw.c rtw88-usb-HEAD/fw.c
---- rtw88/fw.c	2024-07-24 14:56:34.824191142 +0200
-+++ rtw88-usb-HEAD/fw.c	2024-07-24 14:48:55.142793009 +0200
+Gemeenschappelijke submappen: rtw88/firmware en rtw88-b/firmware
+diff -u rtw88/fw.c rtw88-b/fw.c
+--- rtw88/fw.c	2024-08-06 10:48:39.812045109 +0200
++++ rtw88-b/fw.c	2024-08-06 10:49:52.708677401 +0200
 @@ -194,7 +194,7 @@
  	si->ra_report.desc_rate = rate;
  	si->ra_report.bit_rate = bit_rate;
@@ -80,9 +78,9 @@ diff -u rtw88/fw.c rtw88-usb-HEAD/fw.c
  		skb_new = ieee80211_nullfunc_get(hw, vif, -1, true);
  #else
  		skb_new = ieee80211_nullfunc_get(hw, vif, true);
-diff -u rtw88/fw.h rtw88-usb-HEAD/fw.h
---- rtw88/fw.h	2024-07-24 14:56:34.824191142 +0200
-+++ rtw88-usb-HEAD/fw.h	2024-07-24 14:48:55.143793043 +0200
+diff -u rtw88/fw.h rtw88-b/fw.h
+--- rtw88/fw.h	2024-08-06 10:48:39.813045145 +0200
++++ rtw88-b/fw.h	2024-08-06 10:49:52.708677401 +0200
 @@ -836,7 +836,7 @@
  
  void rtw_fw_bt_wifi_control(struct rtw_dev *rtwdev, u8 op_code, u8 *data);
@@ -92,11 +90,11 @@ diff -u rtw88/fw.h rtw88-usb-HEAD/fw.h
  void rtw_fw_send_ra_info(struct rtw_dev *rtwdev, struct rtw_sta_info *si,
  			 bool reset_ra_mask);
  #else
-Alleen in rtw88/: .git
-diff -u rtw88/mac80211.c rtw88-usb-HEAD/mac80211.c
---- rtw88/mac80211.c	2024-07-24 14:56:34.824191142 +0200
-+++ rtw88-usb-HEAD/mac80211.c	2024-07-24 14:48:55.143793043 +0200
-@@ -365,7 +364,7 @@
+Gemeenschappelijke submappen: rtw88/.git en rtw88-b/.git
+diff -u rtw88/mac80211.c rtw88-b/mac80211.c
+--- rtw88/mac80211.c	2024-08-06 10:48:39.813045145 +0200
++++ rtw88-b/mac80211.c	2024-08-06 10:49:52.708677401 +0200
+@@ -365,7 +365,7 @@
  static void rtw_ops_bss_info_changed(struct ieee80211_hw *hw,
  				     struct ieee80211_vif *vif,
  				     struct ieee80211_bss_conf *conf,
@@ -105,7 +103,7 @@ diff -u rtw88/mac80211.c rtw88-usb-HEAD/mac80211.c
  				     u64 changed)
  #else
  				     u32 changed)
-@@ -383,7 +382,7 @@
+@@ -383,7 +383,7 @@
  
  	if (changed & BSS_CHANGED_ASSOC) {
  		rtw_vif_assoc_changed(rtwvif, conf);
@@ -114,7 +112,7 @@ diff -u rtw88/mac80211.c rtw88-usb-HEAD/mac80211.c
  		if (vif->cfg.assoc) {
  #else
  		if (conf->assoc) {
-@@ -392,7 +391,7 @@
+@@ -392,7 +392,7 @@
  			rtw_fw_download_rsvd_page(rtwdev);
  			rtw_send_rsvd_page_h2c(rtwdev);
  			rtw_fw_default_port(rtwdev, rtwvif);
@@ -123,7 +121,7 @@ diff -u rtw88/mac80211.c rtw88-usb-HEAD/mac80211.c
  			rtw_coex_media_status_notify(rtwdev, vif->cfg.assoc);
  #else
  			rtw_coex_media_status_notify(rtwdev, conf->assoc);
-@@ -461,7 +460,7 @@
+@@ -461,7 +461,7 @@
  	mutex_unlock(&rtwdev->mutex);
  }
  
@@ -132,7 +130,7 @@ diff -u rtw88/mac80211.c rtw88-usb-HEAD/mac80211.c
  static int rtw_ops_start_ap(struct ieee80211_hw *hw,
  			    struct ieee80211_vif *vif,
  			    struct ieee80211_bss_conf *link_conf)
-@@ -482,7 +481,7 @@
+@@ -483,7 +483,7 @@
  	return 0;
  }
  
@@ -141,7 +139,7 @@ diff -u rtw88/mac80211.c rtw88-usb-HEAD/mac80211.c
  static void rtw_ops_stop_ap(struct ieee80211_hw *hw,
  			    struct ieee80211_vif *vif,
  			    struct ieee80211_bss_conf *link_conf)
-@@ -503,7 +502,7 @@
+@@ -505,7 +505,7 @@
  
  static int rtw_ops_conf_tx(struct ieee80211_hw *hw,
  			   struct ieee80211_vif *vif,
@@ -150,18 +148,19 @@ diff -u rtw88/mac80211.c rtw88-usb-HEAD/mac80211.c
  			   unsigned int link_id, u16 ac,
  #else
  			   u16 ac,
-@@ -732,7 +731,7 @@
+@@ -734,7 +734,7 @@
  #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 18, 0)
  static void rtw_ops_mgd_prepare_tx(struct ieee80211_hw *hw,
  				   struct ieee80211_vif *vif,
 -    #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0))
 +    #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0)) || defined(OPENWRT)
  				   struct ieee80211_prep_tx_info *info)
-    #else
-				   u16 duration)
-diff -u rtw88/main.c rtw88-usb-HEAD/main.c
---- rtw88/main.c	2024-07-24 14:56:34.824191142 +0200
-+++ rtw88-usb-HEAD/main.c	2024-07-24 14:48:55.143793043 +0200
+     #else
+ 				   u16 duration)
+Alleen in rtw88-b: mac80211.c.orig
+diff -u rtw88/main.c rtw88-b/main.c
+--- rtw88/main.c	2024-08-06 10:48:39.813045145 +0200
++++ rtw88-b/main.c	2024-08-06 10:49:52.709677438 +0200
 @@ -193,7 +193,7 @@
  	struct rtw_vif *rtwvif = (struct rtw_vif *)vif->drv_priv;
  
@@ -382,9 +381,9 @@ diff -u rtw88/main.c rtw88-usb-HEAD/main.c
  	if (vif->cfg.assoc || !is_zero_ether_addr(rtwvif->bssid))
  #else
  	if (vif->bss_conf.assoc || !is_zero_ether_addr(rtwvif->bssid))
-diff -u rtw88/main.h rtw88-usb-HEAD/main.h
---- rtw88/main.h	2024-07-24 14:56:34.824191142 +0200
-+++ rtw88-usb-HEAD/main.h	2024-07-24 14:57:42.710475119 +0200
+diff -u rtw88/main.h rtw88-b/main.h
+--- rtw88/main.h	2024-08-06 10:48:39.813045145 +0200
++++ rtw88-b/main.h	2024-08-06 10:49:52.709677438 +0200
 @@ -33,6 +33,8 @@
  #define RHEL_RELEASE_VERSION(a, b) a<<8 & b
  #endif
@@ -394,12 +393,21 @@ diff -u rtw88/main.h rtw88-usb-HEAD/main.h
  #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
  /**
   * cfg80211_ssid_eq - compare two SSIDs
-Alleen in rtw88-usb-HEAD/: .main.o.d
-Alleen in rtw88-usb-HEAD/: .prepared_25c9856d8c7d5433bedb4883d5fb5cdc_18f1e190c5d53547fed41a3eaa76e9e9
-Alleen in rtw88-usb-HEAD/: .prepared_25c9856d8c7d5433bedb4883d5fb5cdc_18f1e190c5d53547fed41a3eaa76e9e9_check
-diff -u rtw88/ps.c rtw88-usb-HEAD/ps.c
---- rtw88/ps.c	2024-07-24 14:56:34.825191176 +0200
-+++ rtw88-usb-HEAD/ps.c	2024-07-24 14:48:55.144793076 +0200
+diff -u rtw88/pci.c rtw88-b/pci.c
+--- rtw88/pci.c	2024-08-06 10:48:39.813045145 +0200
++++ rtw88-b/pci.c	2024-08-06 10:50:43.434509105 +0200
+@@ -1691,7 +1691,7 @@
+ 	struct rtw_pci *rtwpci = (struct rtw_pci *)rtwdev->priv;
+ 
+ 	init_dummy_netdev(&rtwpci->netdev);
+-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0) || defined(OPENWRT)
+ 	netif_napi_add(&rtwpci->netdev, &rtwpci->napi, rtw_pci_napi_poll);
+ #else
+ 	netif_napi_add(&rtwpci->netdev, &rtwpci->napi, rtw_pci_napi_poll,
+diff -u rtw88/ps.c rtw88-b/ps.c
+--- rtw88/ps.c	2024-08-06 10:48:39.814045181 +0200
++++ rtw88-b/ps.c	2024-08-06 10:49:52.709677438 +0200
 @@ -334,7 +334,7 @@
  		__rtw_vif_recalc_lps(&data, new_vif);
  	rtw_iterate_vifs(rtwdev, rtw_vif_recalc_lps_iter, &data);
@@ -409,9 +417,9 @@ diff -u rtw88/ps.c rtw88-usb-HEAD/ps.c
  	if (data.count == 1 && data.found_vif->cfg.ps) {
  		rtwdev->ps_enabled = true;
  	} else {
-diff -u rtw88/tx.c rtw88-usb-HEAD/tx.c
---- rtw88/tx.c	2024-07-24 14:56:34.831191377 +0200
-+++ rtw88-usb-HEAD/tx.c	2024-07-24 14:48:55.144793076 +0200
+diff -u rtw88/tx.c rtw88-b/tx.c
+--- rtw88/tx.c	2024-08-06 10:48:39.820045398 +0200
++++ rtw88-b/tx.c	2024-08-06 10:49:52.710677474 +0200
 @@ -94,7 +94,7 @@
  
  static u8 get_tx_ampdu_factor(struct ieee80211_sta *sta)
