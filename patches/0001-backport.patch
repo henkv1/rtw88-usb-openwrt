@@ -385,22 +385,12 @@ diff -u a/main.h b/main.h
  #define RHEL_RELEASE_VERSION(a, b) a<<8 & b
  #endif
  
--#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
 +#define OPENWRT
 +
-+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0) && !defined(OPENWRT)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
  /**
   * cfg80211_ssid_eq - compare two SSIDs
   * @a: first SSID
-@@ -2351,7 +2353,7 @@
- void rtw_core_port_switch(struct rtw_dev *rtwdev, struct ieee80211_vif *vif);
- bool rtw_core_check_sta_active(struct rtw_dev *rtwdev);
- void rtw_core_enable_beacon(struct rtw_dev *rtwdev, bool enable);
--#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
-+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0) && !defined(OPENWRT)
- static inline bool rtw_ssid_equal(struct cfg80211_ssid *a,
-                                  struct cfg80211_ssid *b)
- {
 diff -u a/pci.c b/pci.c
 --- a/pci.c	2024-08-28 09:18:53.607276715 +0200
 +++ b/pci.c	2024-08-27 19:42:23.009407218 +0200
