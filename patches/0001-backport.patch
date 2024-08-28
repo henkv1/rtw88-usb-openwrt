@@ -387,7 +387,7 @@ diff -u a/main.h b/main.h
  
 +#define OPENWRT
 +
-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
+ #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
  /**
   * cfg80211_ssid_eq - compare two SSIDs
   * @a: first SSID
