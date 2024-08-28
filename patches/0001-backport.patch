@@ -1,7 +1,6 @@
-Gemeenschappelijke submappen: rtw88/alt_rtl8821ce en rtw88-b/alt_rtl8821ce
-diff -u rtw88/bf.c rtw88-b/bf.c
---- rtw88/bf.c	2024-08-06 10:48:39.806044892 +0200
-+++ rtw88-b/bf.c	2024-08-06 10:49:52.707677365 +0200
+diff -u a/bf.c b/bf.c
+--- a/bf.c	2024-08-28 09:18:53.597276679 +0200
++++ b/bf.c	2024-08-27 19:42:23.006407207 +0200
 @@ -57,7 +57,7 @@
  	}
  
@@ -20,10 +19,9 @@ diff -u rtw88/bf.c rtw88-b/bf.c
  		bfee->aid = vif->cfg.aid;
  #else
  		bfee->aid = bss_conf->aid;
-Gemeenschappelijke submappen: rtw88/firmware en rtw88-b/firmware
-diff -u rtw88/fw.c rtw88-b/fw.c
---- rtw88/fw.c	2024-08-06 10:48:39.812045109 +0200
-+++ rtw88-b/fw.c	2024-08-06 10:49:52.708677401 +0200
+diff -u a/fw.c b/fw.c
+--- a/fw.c	2024-08-28 09:18:53.605276708 +0200
++++ b/fw.c	2024-08-27 19:42:23.007407211 +0200
 @@ -194,7 +194,7 @@
  	si->ra_report.desc_rate = rate;
  	si->ra_report.bit_rate = bit_rate;
@@ -78,9 +76,9 @@ diff -u rtw88/fw.c rtw88-b/fw.c
  		skb_new = ieee80211_nullfunc_get(hw, vif, -1, true);
  #else
  		skb_new = ieee80211_nullfunc_get(hw, vif, true);
-diff -u rtw88/fw.h rtw88-b/fw.h
---- rtw88/fw.h	2024-08-06 10:48:39.813045145 +0200
-+++ rtw88-b/fw.h	2024-08-06 10:49:52.708677401 +0200
+diff -u a/fw.h b/fw.h
+--- a/fw.h	2024-08-28 09:18:53.606276712 +0200
++++ b/fw.h	2024-08-27 19:42:23.007407211 +0200
 @@ -836,7 +836,7 @@
  
  void rtw_fw_bt_wifi_control(struct rtw_dev *rtwdev, u8 op_code, u8 *data);
@@ -90,11 +88,10 @@ diff -u rtw88/fw.h rtw88-b/fw.h
  void rtw_fw_send_ra_info(struct rtw_dev *rtwdev, struct rtw_sta_info *si,
  			 bool reset_ra_mask);
  #else
-Gemeenschappelijke submappen: rtw88/.git en rtw88-b/.git
-diff -u rtw88/mac80211.c rtw88-b/mac80211.c
---- rtw88/mac80211.c	2024-08-06 10:48:39.813045145 +0200
-+++ rtw88-b/mac80211.c	2024-08-06 10:49:52.708677401 +0200
-@@ -365,7 +365,7 @@
+diff -u a/mac80211.c b/mac80211.c
+--- a/mac80211.c	2024-08-28 09:18:53.606276712 +0200
++++ b/mac80211.c	2024-08-27 19:42:23.007407211 +0200
+@@ -369,7 +369,7 @@
  static void rtw_ops_bss_info_changed(struct ieee80211_hw *hw,
  				     struct ieee80211_vif *vif,
  				     struct ieee80211_bss_conf *conf,
@@ -103,7 +100,7 @@ diff -u rtw88/mac80211.c rtw88-b/mac80211.c
  				     u64 changed)
  #else
  				     u32 changed)
-@@ -383,7 +383,7 @@
+@@ -387,7 +387,7 @@
  
  	if (changed & BSS_CHANGED_ASSOC) {
  		rtw_vif_assoc_changed(rtwvif, conf);
@@ -112,7 +109,7 @@ diff -u rtw88/mac80211.c rtw88-b/mac80211.c
  		if (vif->cfg.assoc) {
  #else
  		if (conf->assoc) {
-@@ -392,7 +392,7 @@
+@@ -396,7 +396,7 @@
  			rtw_fw_download_rsvd_page(rtwdev);
  			rtw_send_rsvd_page_h2c(rtwdev);
  			rtw_fw_default_port(rtwdev, rtwvif);
@@ -121,7 +118,7 @@ diff -u rtw88/mac80211.c rtw88-b/mac80211.c
  			rtw_coex_media_status_notify(rtwdev, vif->cfg.assoc);
  #else
  			rtw_coex_media_status_notify(rtwdev, conf->assoc);
-@@ -461,7 +461,7 @@
+@@ -465,7 +465,7 @@
  	mutex_unlock(&rtwdev->mutex);
  }
  
@@ -130,7 +127,7 @@ diff -u rtw88/mac80211.c rtw88-b/mac80211.c
  static int rtw_ops_start_ap(struct ieee80211_hw *hw,
  			    struct ieee80211_vif *vif,
  			    struct ieee80211_bss_conf *link_conf)
-@@ -483,7 +483,7 @@
+@@ -487,7 +487,7 @@
  	return 0;
  }
  
@@ -139,7 +136,7 @@ diff -u rtw88/mac80211.c rtw88-b/mac80211.c
  static void rtw_ops_stop_ap(struct ieee80211_hw *hw,
  			    struct ieee80211_vif *vif,
  			    struct ieee80211_bss_conf *link_conf)
-@@ -505,7 +505,7 @@
+@@ -509,7 +509,7 @@
  
  static int rtw_ops_conf_tx(struct ieee80211_hw *hw,
  			   struct ieee80211_vif *vif,
@@ -148,7 +145,7 @@ diff -u rtw88/mac80211.c rtw88-b/mac80211.c
  			   unsigned int link_id, u16 ac,
  #else
  			   u16 ac,
-@@ -734,7 +734,7 @@
+@@ -738,7 +738,7 @@
  #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 18, 0)
  static void rtw_ops_mgd_prepare_tx(struct ieee80211_hw *hw,
  				   struct ieee80211_vif *vif,
@@ -157,10 +154,10 @@ diff -u rtw88/mac80211.c rtw88-b/mac80211.c
  				   struct ieee80211_prep_tx_info *info)
      #else
  				   u16 duration)
-Alleen in rtw88-b: mac80211.c.orig
-diff -u rtw88/main.c rtw88-b/main.c
---- rtw88/main.c	2024-08-06 10:48:39.813045145 +0200
-+++ rtw88-b/main.c	2024-08-06 10:49:52.709677438 +0200
+Alleen in b/: mac80211.c.orig
+diff -u a/main.c b/main.c
+--- a/main.c	2024-08-28 09:18:53.606276712 +0200
++++ b/main.c	2024-08-27 19:42:23.008407214 +0200
 @@ -193,7 +193,7 @@
  	struct rtw_vif *rtwvif = (struct rtw_vif *)vif->drv_priv;
  
@@ -381,21 +378,32 @@ diff -u rtw88/main.c rtw88-b/main.c
  	if (vif->cfg.assoc || !is_zero_ether_addr(rtwvif->bssid))
  #else
  	if (vif->bss_conf.assoc || !is_zero_ether_addr(rtwvif->bssid))
-diff -u rtw88/main.h rtw88-b/main.h
---- rtw88/main.h	2024-08-06 10:48:39.813045145 +0200
-+++ rtw88-b/main.h	2024-08-06 10:49:52.709677438 +0200
-@@ -33,6 +33,8 @@
+diff -u a/main.h b/main.h
+--- a/main.h	2024-08-28 09:18:53.606276712 +0200
++++ b/main.h	2024-08-28 09:25:26.706696672 +0200
+@@ -33,7 +33,9 @@
  #define RHEL_RELEASE_VERSION(a, b) a<<8 & b
  #endif
  
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
 +#define OPENWRT
 +
- #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0) && !defined(OPENWRT)
  /**
   * cfg80211_ssid_eq - compare two SSIDs
-diff -u rtw88/pci.c rtw88-b/pci.c
---- rtw88/pci.c	2024-08-06 10:48:39.813045145 +0200
-+++ rtw88-b/pci.c	2024-08-06 10:50:43.434509105 +0200
+  * @a: first SSID
+@@ -2351,7 +2353,7 @@
+ void rtw_core_port_switch(struct rtw_dev *rtwdev, struct ieee80211_vif *vif);
+ bool rtw_core_check_sta_active(struct rtw_dev *rtwdev);
+ void rtw_core_enable_beacon(struct rtw_dev *rtwdev, bool enable);
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0) && !defined(OPENWRT)
+ static inline bool rtw_ssid_equal(struct cfg80211_ssid *a,
+                                  struct cfg80211_ssid *b)
+ {
+diff -u a/pci.c b/pci.c
+--- a/pci.c	2024-08-28 09:18:53.607276715 +0200
++++ b/pci.c	2024-08-27 19:42:23.009407218 +0200
 @@ -1691,7 +1691,7 @@
  	struct rtw_pci *rtwpci = (struct rtw_pci *)rtwdev->priv;
  
@@ -405,9 +413,9 @@ diff -u rtw88/pci.c rtw88-b/pci.c
  	netif_napi_add(&rtwpci->netdev, &rtwpci->napi, rtw_pci_napi_poll);
  #else
  	netif_napi_add(&rtwpci->netdev, &rtwpci->napi, rtw_pci_napi_poll,
-diff -u rtw88/ps.c rtw88-b/ps.c
---- rtw88/ps.c	2024-08-06 10:48:39.814045181 +0200
-+++ rtw88-b/ps.c	2024-08-06 10:49:52.709677438 +0200
+diff -u a/ps.c b/ps.c
+--- a/ps.c	2024-08-28 09:18:53.607276715 +0200
++++ b/ps.c	2024-08-27 19:42:23.009407218 +0200
 @@ -334,7 +334,7 @@
  		__rtw_vif_recalc_lps(&data, new_vif);
  	rtw_iterate_vifs(rtwdev, rtw_vif_recalc_lps_iter, &data);
@@ -417,9 +425,9 @@ diff -u rtw88/ps.c rtw88-b/ps.c
  	if (data.count == 1 && data.found_vif->cfg.ps) {
  		rtwdev->ps_enabled = true;
  	} else {
-diff -u rtw88/tx.c rtw88-b/tx.c
---- rtw88/tx.c	2024-08-06 10:48:39.820045398 +0200
-+++ rtw88-b/tx.c	2024-08-06 10:49:52.710677474 +0200
+diff -u a/tx.c b/tx.c
+--- a/tx.c	2024-08-28 09:18:53.616276748 +0200
++++ b/tx.c	2024-08-27 19:42:23.009407218 +0200
 @@ -94,7 +94,7 @@
  
  static u8 get_tx_ampdu_factor(struct ieee80211_sta *sta)
