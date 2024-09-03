@@ -8,10 +8,7 @@ PKG_LICENSE_FILES:=
 
 PKG_SOURCE_URL:=https://github.com/lwfinger/rtw88
 PKG_SOURCE_PROTO:=git
-#PKG_SOURCE_DATE:=2020-10-17
-#PKG_SOURCE_VERSION:=f9f4ee862b3e1f9e6a543d503a084rffg56
-PKG_SOURCE_VERSION:=HEAD
-#PKG_MIRROR_HASH:=60359df8b49fa433d38b968b0df7eaddaca10f13cdd57471394bac1f6e5a162e
+PKG_SOURCE_VERSION:=764a1ee307d7e5720a93b8139c94d76737eced91
 
 # PKG_MAINTAINER:=
 PKG_BUILD_PARALLEL:=1
@@ -21,16 +18,24 @@ STAMP_CONFIGURED_DEPENDS := $(STAGING_DIR)/usr/include/mac80211-backport/backpor
 include $(INCLUDE_DIR)/kernel.mk
 include $(INCLUDE_DIR)/package.mk
 
+define Package/rtw88-firmware
+  TITLE:= RealTek rtw88 firmware files
+  SECTION:=firmware
+  CATEGORY:=Firmware
+  DEPENDS:=
+endef
+
 RTW_AUTOLOAD := rtw_8821cu \
 		rtw_8822bu \
 		rtw_8822cu \
 		rtw_8812au \
-		rtw_8821au
+		rtw_8821au \
+		rtw_8723du
 
 define KernelPackage/rtw88-usb
   SUBMENU:=Wireless Drivers
   TITLE:= Realtek RTL8822CU AP Mode
-  DEPENDS:=+kmod-cfg80211 +kmod-mac80211 +kmod-usb-core +@DRIVER_11N_SUPPORT +@DRIVER_11AC_SUPPORT +@PCI_SUPPORT
+  DEPENDS:=+kmod-cfg80211 +kmod-mac80211 +kmod-usb-core +@DRIVER_11N_SUPPORT +@DRIVER_11AC_SUPPORT +@PCI_SUPPORT +rtw88-firmware
   FILES:=\
 	$(PKG_BUILD_DIR)/rtw_usb.ko \
 	$(PKG_BUILD_DIR)/rtw_core.ko \
@@ -42,7 +47,10 @@ define KernelPackage/rtw88-usb
 	$(PKG_BUILD_DIR)/rtw_8821cu.ko \
 	$(PKG_BUILD_DIR)/rtw_8821a.ko \
 	$(PKG_BUILD_DIR)/rtw_8821au.ko \
-	$(PKG_BUILD_DIR)/rtw_8812au.ko
+	$(PKG_BUILD_DIR)/rtw_8812au.ko \
+	$(PKG_BUILD_DIR)/rtw_8723d.ko \
+	$(PKG_BUILD_DIR)/rtw_8723x.ko \
+	$(PKG_BUILD_DIR)/rtw_8723du.ko
   AUTOLOAD:=$(call AutoLoad,50,$(RTW_AUTOLOAD))
 endef
 
@@ -80,6 +88,12 @@ define Build/Compile
 		modules
 endef
 
-
+define Package/rtw88-firmware/install
+	$(INSTALL_DIR) $(1)/lib/firmware/rtw88
+	$(INSTALL_DATA) \
+		$(PKG_BUILD_DIR)/firmware/* \
+		$(1)/lib/firmware/rtw88/
+endef
 
 $(eval $(call KernelPackage,rtw88-usb))
+$(eval $(call BuildPackage,rtw88-firmware))
