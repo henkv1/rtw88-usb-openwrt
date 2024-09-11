@@ -1,6 +1,7 @@
-diff -u a/bf.c b/bf.c
---- a/bf.c	2024-08-28 09:18:53.597276679 +0200
-+++ b/bf.c	2024-08-27 19:42:23.006407207 +0200
+Gemeenschappelijke submappen: rtw88/alt_rtl8821ce en src/alt_rtl8821ce
+diff -u rtw88/bf.c src/bf.c
+--- rtw88/bf.c	2024-09-11 16:27:07.213921696 +0200
++++ src/bf.c	2024-09-11 15:54:47.007616577 +0200
 @@ -57,7 +57,7 @@
  	}
  
@@ -19,9 +20,11 @@ diff -u a/bf.c b/bf.c
  		bfee->aid = vif->cfg.aid;
  #else
  		bfee->aid = bss_conf->aid;
-diff -u a/fw.c b/fw.c
---- a/fw.c	2024-08-28 09:18:53.605276708 +0200
-+++ b/fw.c	2024-08-27 19:42:23.007407211 +0200
+Gemeenschappelijke submappen: rtw88/dkms en src/dkms
+Gemeenschappelijke submappen: rtw88/firmware en src/firmware
+diff -u rtw88/fw.c src/fw.c
+--- rtw88/fw.c	2024-09-11 16:27:07.217255137 +0200
++++ src/fw.c	2024-09-11 15:54:47.007616577 +0200
 @@ -194,7 +194,7 @@
  	si->ra_report.desc_rate = rate;
  	si->ra_report.bit_rate = bit_rate;
@@ -76,9 +79,9 @@ diff -u a/fw.c b/fw.c
  		skb_new = ieee80211_nullfunc_get(hw, vif, -1, true);
  #else
  		skb_new = ieee80211_nullfunc_get(hw, vif, true);
-diff -u a/fw.h b/fw.h
---- a/fw.h	2024-08-28 09:18:53.606276712 +0200
-+++ b/fw.h	2024-08-27 19:42:23.007407211 +0200
+diff -u rtw88/fw.h src/fw.h
+--- rtw88/fw.h	2024-09-11 16:27:07.217255137 +0200
++++ src/fw.h	2024-09-11 15:54:47.010950020 +0200
 @@ -836,7 +836,7 @@
  
  void rtw_fw_bt_wifi_control(struct rtw_dev *rtwdev, u8 op_code, u8 *data);
@@ -88,10 +91,52 @@ diff -u a/fw.h b/fw.h
  void rtw_fw_send_ra_info(struct rtw_dev *rtwdev, struct rtw_sta_info *si,
  			 bool reset_ra_mask);
  #else
-diff -u a/mac80211.c b/mac80211.c
---- a/mac80211.c	2024-08-28 09:18:53.606276712 +0200
-+++ b/mac80211.c	2024-08-27 19:42:23.007407211 +0200
-@@ -369,7 +369,7 @@
+Gemeenschappelijke submappen: rtw88/.git en src/.git
+diff -u rtw88/mac80211.c src/mac80211.c
+--- rtw88/mac80211.c	2024-09-11 16:27:07.217255137 +0200
++++ src/mac80211.c	2024-09-11 15:54:47.010950020 +0200
+@@ -173,6 +173,12 @@
+ 
+ 	mutex_lock(&rtwdev->mutex);
+ 
++	rtwvif->mac_id = rtw_acquire_macid(rtwdev);
++	if (rtwvif->mac_id >= RTW_MAX_MAC_ID_NUM) {
++		mutex_unlock(&rtwdev->mutex);
++		return -ENOSPC;
++	}
++
+ 	port = find_first_zero_bit(rtwdev->hw_port, RTW_PORT_NUM);
+ 	if (port >= RTW_PORT_NUM) {
+ 		mutex_unlock(&rtwdev->mutex);
+@@ -220,7 +226,8 @@
+ 
+ 	mutex_unlock(&rtwdev->mutex);
+ 
+-	rtw_dbg(rtwdev, RTW_DBG_STATE, "start vif %pM on port %d\n", vif->addr, rtwvif->port);
++	rtw_dbg(rtwdev, RTW_DBG_STATE, "start vif %pM mac_id %d on port %d\n",
++		vif->addr, rtwvif->mac_id, rtwvif->port);
+ 	return 0;
+ }
+ 
+@@ -231,7 +238,8 @@
+ 	struct rtw_vif *rtwvif = (struct rtw_vif *)vif->drv_priv;
+ 	u32 config = 0;
+ 
+-	rtw_dbg(rtwdev, RTW_DBG_STATE, "stop vif %pM on port %d\n", vif->addr, rtwvif->port);
++	rtw_dbg(rtwdev, RTW_DBG_STATE, "stop vif %pM mac_id %d on port %d\n",
++		vif->addr, rtwvif->mac_id, rtwvif->port);
+ 
+ 	mutex_lock(&rtwdev->mutex);
+ 
+@@ -248,6 +256,7 @@
+ 	config |= PORT_SET_BCN_CTRL;
+ 	rtw_vif_port_config(rtwdev, rtwvif, config);
+ 	clear_bit(rtwvif->port, rtwdev->hw_port);
++	rtw_release_macid(rtwdev, rtwvif->mac_id);
+ 	rtw_recalc_lps(rtwdev, NULL);
+ 
+ 	mutex_unlock(&rtwdev->mutex);
+@@ -369,7 +378,7 @@
  static void rtw_ops_bss_info_changed(struct ieee80211_hw *hw,
  				     struct ieee80211_vif *vif,
  				     struct ieee80211_bss_conf *conf,
@@ -100,7 +145,7 @@ diff -u a/mac80211.c b/mac80211.c
  				     u64 changed)
  #else
  				     u32 changed)
-@@ -387,7 +387,7 @@
+@@ -387,7 +396,7 @@
  
  	if (changed & BSS_CHANGED_ASSOC) {
  		rtw_vif_assoc_changed(rtwvif, conf);
@@ -109,7 +154,7 @@ diff -u a/mac80211.c b/mac80211.c
  		if (vif->cfg.assoc) {
  #else
  		if (conf->assoc) {
-@@ -396,7 +396,7 @@
+@@ -396,7 +405,7 @@
  			rtw_fw_download_rsvd_page(rtwdev);
  			rtw_send_rsvd_page_h2c(rtwdev);
  			rtw_fw_default_port(rtwdev, rtwvif);
@@ -118,7 +163,7 @@ diff -u a/mac80211.c b/mac80211.c
  			rtw_coex_media_status_notify(rtwdev, vif->cfg.assoc);
  #else
  			rtw_coex_media_status_notify(rtwdev, conf->assoc);
-@@ -465,7 +465,7 @@
+@@ -465,7 +474,7 @@
  	mutex_unlock(&rtwdev->mutex);
  }
  
@@ -127,7 +172,15 @@ diff -u a/mac80211.c b/mac80211.c
  static int rtw_ops_start_ap(struct ieee80211_hw *hw,
  			    struct ieee80211_vif *vif,
  			    struct ieee80211_bss_conf *link_conf)
-@@ -487,7 +487,7 @@
+@@ -477,7 +486,6 @@
+ 	const struct rtw_chip_info *chip = rtwdev->chip;
+ 
+ 	mutex_lock(&rtwdev->mutex);
+-	set_bit(0, rtwdev->mac_id_map);
+ 	rtw_write32_set(rtwdev, REG_TCR, BIT_TCR_UPDATE_HGQMD);
+ 	rtwdev->ap_active = true;
+ 	rtw_store_op_chan(rtwdev, true);
+@@ -487,7 +495,7 @@
  	return 0;
  }
  
@@ -136,7 +189,13 @@ diff -u a/mac80211.c b/mac80211.c
  static void rtw_ops_stop_ap(struct ieee80211_hw *hw,
  			    struct ieee80211_vif *vif,
  			    struct ieee80211_bss_conf *link_conf)
-@@ -509,7 +509,7 @@
+@@ -503,13 +511,12 @@
+ 	rtwdev->ap_active = false;
+ 	if (!rtw_core_check_sta_active(rtwdev))
+ 		rtw_clear_op_chan(rtwdev);
+-	clear_bit(0, rtwdev->mac_id_map);
+ 	mutex_unlock(&rtwdev->mutex);
+ }
  
  static int rtw_ops_conf_tx(struct ieee80211_hw *hw,
  			   struct ieee80211_vif *vif,
@@ -145,7 +204,7 @@ diff -u a/mac80211.c b/mac80211.c
  			   unsigned int link_id, u16 ac,
  #else
  			   u16 ac,
-@@ -738,7 +738,7 @@
+@@ -738,7 +745,7 @@
  #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 18, 0)
  static void rtw_ops_mgd_prepare_tx(struct ieee80211_hw *hw,
  				   struct ieee80211_vif *vif,
@@ -154,10 +213,10 @@ diff -u a/mac80211.c b/mac80211.c
  				   struct ieee80211_prep_tx_info *info)
      #else
  				   u16 duration)
-Alleen in b/: mac80211.c.orig
-diff -u a/main.c b/main.c
---- a/main.c	2024-08-28 09:18:53.606276712 +0200
-+++ b/main.c	2024-08-27 19:42:23.008407214 +0200
+Alleen in src/: mac80211.c.orig
+diff -u rtw88/main.c src/main.c
+--- rtw88/main.c	2024-09-11 16:27:07.220588579 +0200
++++ src/main.c	2024-09-11 15:54:47.010950020 +0200
 @@ -193,7 +193,7 @@
  	struct rtw_vif *rtwvif = (struct rtw_vif *)vif->drv_priv;
  
@@ -167,16 +226,65 @@ diff -u a/main.c b/main.c
  		if (vif->cfg.assoc)
  #else
  		if (vif->bss_conf.assoc)
-@@ -369,7 +369,7 @@
- 	if (si->mac_id >= RTW_MAX_MAC_ID_NUM)
- 		return -ENOSPC;
+@@ -336,17 +336,6 @@
+ 	mutex_unlock(&rtwdev->mutex);
+ }
  
+-static u8 rtw_acquire_macid(struct rtw_dev *rtwdev)
+-{
+-	unsigned long mac_id;
+-
+-	mac_id = find_first_zero_bit(rtwdev->mac_id_map, RTW_MAX_MAC_ID_NUM);
+-	if (mac_id < RTW_MAX_MAC_ID_NUM)
+-		set_bit(mac_id, rtwdev->mac_id_map);
+-
+-	return mac_id;
+-}
+-
+ static void rtw_sta_rc_work(struct work_struct *work)
+ {
+ 	struct rtw_sta_info *si = container_of(work, struct rtw_sta_info,
+@@ -365,16 +354,14 @@
+ 	struct rtw_vif *rtwvif = (struct rtw_vif *)vif->drv_priv;
+ 	int i;
+ 
+-	si->mac_id = rtw_acquire_macid(rtwdev);
+-	if (si->mac_id >= RTW_MAX_MAC_ID_NUM)
+-		return -ENOSPC;
+-
 -#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0) || defined(OPENWRT)
- 	if (vif->type == NL80211_IFTYPE_STATION && vif->cfg.assoc == 0)
- #else
- 	if (vif->type == NL80211_IFTYPE_STATION && vif->bss_conf.assoc == 0)
-@@ -598,7 +598,7 @@
+-	if (vif->type == NL80211_IFTYPE_STATION && vif->cfg.assoc == 0)
+-#else
+-	if (vif->type == NL80211_IFTYPE_STATION && vif->bss_conf.assoc == 0)
+-#endif
+-		rtwvif->mac_id = si->mac_id;
++        if (vif->type == NL80211_IFTYPE_STATION) {
++                si->mac_id = rtwvif->mac_id;
++        } else {
++                si->mac_id = rtw_acquire_macid(rtwdev);
++                if (si->mac_id >= RTW_MAX_MAC_ID_NUM)
++                        return -ENOSPC;
++        }
++ 
+ 	si->rtwdev = rtwdev;
+ 	si->sta = sta;
+ 	si->vif = vif;
+@@ -399,11 +386,13 @@
+ 		    bool fw_exist)
+ {
+ 	struct rtw_sta_info *si = (struct rtw_sta_info *)sta->drv_priv;
++	struct ieee80211_vif *vif = si->vif;
+ 	int i;
+ 
+ 	cancel_work_sync(&si->rc_work);
+ 
+-	rtw_release_macid(rtwdev, si->mac_id);
++	if (vif->type != NL80211_IFTYPE_STATION)
++		rtw_release_macid(rtwdev, si->mac_id);
+ 	if (fw_exist)
+ 		rtw_fw_media_status_report(rtwdev, si->mac_id, false);
+ 
+@@ -598,7 +587,7 @@
  void rtw_vif_assoc_changed(struct rtw_vif *rtwvif,
  			   struct ieee80211_bss_conf *conf)
  {
@@ -185,7 +293,16 @@ diff -u a/main.c b/main.c
  	struct ieee80211_vif *vif = NULL;
  
  	if (conf)
-@@ -1026,7 +1026,7 @@
+@@ -648,6 +637,8 @@
+ 	rtw_bf_disassoc(rtwdev, vif, NULL);
+ 	rtw_vif_assoc_changed(rtwvif, NULL);
+ 	rtw_txq_cleanup(rtwdev, vif->txq);
++
++	rtw_release_macid(rtwdev, rtwvif->mac_id);
+ }
+ 
+ void rtw_fw_recovery(struct rtw_dev *rtwdev)
+@@ -1026,7 +1017,7 @@
  static u64 get_vht_ra_mask(struct ieee80211_sta *sta)
  {
  	u64 ra_mask = 0;
@@ -194,7 +311,7 @@ diff -u a/main.c b/main.c
  	u16 mcs_map = le16_to_cpu(sta->deflink.vht_cap.vht_mcs.rx_mcs_map);
  #else
  	u16 mcs_map = le16_to_cpu(sta->vht_cap.vht_mcs.rx_mcs_map);
-@@ -1250,26 +1250,26 @@
+@@ -1250,26 +1241,26 @@
  	bool is_vht_enable = false;
  	bool is_support_sgi = false;
  
@@ -225,7 +342,7 @@ diff -u a/main.c b/main.c
  	} else if (sta->deflink.ht_cap.ht_supported) {
  		ra_mask |= (sta->deflink.ht_cap.mcs.rx_mask[1] << 20) |
  			   (sta->deflink.ht_cap.mcs.rx_mask[0] << 12);
-@@ -1292,20 +1292,20 @@
+@@ -1292,20 +1283,20 @@
  		ra_mask &= RA_MASK_VHT_RATES_1SS | RA_MASK_HT_RATES_1SS;
  
  	if (hal->current_band_type == RTW_BAND_5G) {
@@ -249,7 +366,7 @@ diff -u a/main.c b/main.c
  		} else if (sta->deflink.ht_cap.ht_supported) {
  #else
  		} else if (sta->ht_cap.ht_supported) {
-@@ -1317,13 +1317,13 @@
+@@ -1317,13 +1308,13 @@
  		}
  		dm_info->rrsr_val_init = RRSR_INIT_5G;
  	} else if (hal->current_band_type == RTW_BAND_2G) {
@@ -265,7 +382,7 @@ diff -u a/main.c b/main.c
  		if (sta->deflink.vht_cap.vht_supported) {
  #else
  		if (sta->vht_cap.vht_supported) {
-@@ -1332,7 +1332,7 @@
+@@ -1332,7 +1323,7 @@
  				   RA_MASK_OFDM_IN_VHT;
  			wireless_set = WIRELESS_CCK | WIRELESS_OFDM |
  				       WIRELESS_HT | WIRELESS_VHT;
@@ -274,7 +391,7 @@ diff -u a/main.c b/main.c
  		} else if (sta->deflink.ht_cap.ht_supported) {
  #else
  		} else if (sta->ht_cap.ht_supported) {
-@@ -1341,7 +1341,7 @@
+@@ -1341,7 +1332,7 @@
  				   RA_MASK_OFDM_IN_HT_2G;
  			wireless_set = WIRELESS_CCK | WIRELESS_OFDM |
  				       WIRELESS_HT;
@@ -283,7 +400,7 @@ diff -u a/main.c b/main.c
  		} else if (sta->deflink.supp_rates[0] <= 0xf) {
  #else
  		} else if (sta->supp_rates[0] <= 0xf) {
-@@ -1358,14 +1358,14 @@
+@@ -1358,14 +1349,14 @@
  		wireless_set = 0;
  	}
  
@@ -300,7 +417,7 @@ diff -u a/main.c b/main.c
  		is_support_sgi = sta->deflink.vht_cap.vht_supported &&
  				 (sta->deflink.vht_cap.cap & IEEE80211_VHT_CAP_SHORT_GI_80);
  #else
-@@ -1375,7 +1375,7 @@
+@@ -1375,7 +1366,7 @@
  		break;
  	case IEEE80211_STA_RX_BW_40:
  		bw_mode = RTW_CHANNEL_WIDTH_40;
@@ -309,7 +426,7 @@ diff -u a/main.c b/main.c
  		is_support_sgi = sta->deflink.ht_cap.ht_supported &&
  				 (sta->deflink.ht_cap.cap & IEEE80211_HT_CAP_SGI_40);
  #else
-@@ -1385,7 +1385,7 @@
+@@ -1385,7 +1376,7 @@
  		break;
  	default:
  		bw_mode = RTW_CHANNEL_WIDTH_20;
@@ -318,7 +435,7 @@ diff -u a/main.c b/main.c
  		is_support_sgi = sta->deflink.ht_cap.ht_supported &&
  				 (sta->deflink.ht_cap.cap & IEEE80211_HT_CAP_SGI_20);
  #else
-@@ -1395,14 +1395,14 @@
+@@ -1395,14 +1386,14 @@
  		break;
  	}
  
@@ -335,7 +452,7 @@ diff -u a/main.c b/main.c
  	} else if (sta->deflink.ht_cap.ht_supported && ra_mask & 0xfff00000) {
  #else
  	} else if (sta->ht_cap.ht_supported && ra_mask & 0xfff00000) {
-@@ -1426,7 +1426,7 @@
+@@ -1426,7 +1417,7 @@
  	si->ra_mask = ra_mask;
  	si->rate_id = rate_id;
  
@@ -344,7 +461,7 @@ diff -u a/main.c b/main.c
  	rtw_fw_send_ra_info(rtwdev, si, reset_ra_mask);
  #else
  	rtw_fw_send_ra_info(rtwdev, si);
-@@ -1809,7 +1809,7 @@
+@@ -1809,7 +1800,7 @@
  {
  	struct rtw_dev *rtwdev = (struct rtw_dev *)data;
  
@@ -353,7 +470,7 @@ diff -u a/main.c b/main.c
  	if (vif->type != NL80211_IFTYPE_STATION || !vif->cfg.assoc)
  #else
  	if (vif->type != NL80211_IFTYPE_STATION || !vif->bss_conf.assoc)
-@@ -1817,13 +1817,13 @@
+@@ -1817,13 +1808,13 @@
  		return;
  
  	if (rtwdev->hal.txrx_1ss)
@@ -369,7 +486,15 @@ diff -u a/main.c b/main.c
  		ieee80211_request_smps(vif, 0, IEEE80211_SMPS_OFF);
  #else
  		ieee80211_request_smps(vif, IEEE80211_SMPS_OFF);
-@@ -2555,7 +2555,7 @@
+@@ -2282,7 +2273,6 @@
+ 	rtwdev->sec.total_cam_num = 32;
+ 	rtwdev->hal.current_channel = 1;
+ 	rtwdev->dm_info.fix_rate = U8_MAX;
+-	set_bit(RTW_BC_MC_MACID, rtwdev->mac_id_map);
+ 
+ 	rtw_stats_init(rtwdev);
+ 
+@@ -2555,7 +2545,7 @@
  	if (vif->type != NL80211_IFTYPE_STATION)
  		return;
  
@@ -378,10 +503,12 @@ diff -u a/main.c b/main.c
  	if (vif->cfg.assoc || !is_zero_ether_addr(rtwvif->bssid))
  #else
  	if (vif->bss_conf.assoc || !is_zero_ether_addr(rtwvif->bssid))
-diff -u a/main.h b/main.h
---- a/main.h	2024-08-28 09:18:53.606276712 +0200
-+++ b/main.h	2024-08-28 09:25:26.706696672 +0200
-@@ -33,7 +33,9 @@
+Alleen in src/: main.c.orig
+Alleen in src/: main.c.rej
+diff -u rtw88/main.h src/main.h
+--- rtw88/main.h	2024-09-11 16:27:07.220588579 +0200
++++ src/main.h	2024-09-11 15:54:47.010950020 +0200
+@@ -33,6 +33,8 @@
  #define RHEL_RELEASE_VERSION(a, b) a<<8 & b
  #endif
  
@@ -390,10 +517,45 @@ diff -u a/main.h b/main.h
  #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
  /**
   * cfg80211_ssid_eq - compare two SSIDs
-  * @a: first SSID
-diff -u a/pci.c b/pci.c
---- a/pci.c	2024-08-28 09:18:53.607276715 +0200
-+++ b/pci.c	2024-08-27 19:42:23.009407218 +0200
+@@ -855,7 +857,6 @@
+ 	unsigned long flags;
+ };
+ 
+-#define RTW_BC_MC_MACID 1
+ DECLARE_EWMA(rssi, 10, 16);
+ 
+ struct rtw_sta_info {
+@@ -918,7 +919,7 @@
+ struct rtw_vif {
+ 	enum rtw_net_type net_type;
+ 	u16 aid;
+-	u8 mac_id; /* for STA mode only */
++	u8 mac_id;
+ 	u8 mac_addr[ETH_ALEN];
+ 	u8 bssid[ETH_ALEN];
+ 	u8 port;
+@@ -2270,6 +2271,17 @@
+ 	return rtwdev->chip->tx_stbc;
+ }
+ 
++static inline u8 rtw_acquire_macid(struct rtw_dev *rtwdev)
++{
++	unsigned long mac_id;
++
++	mac_id = find_first_zero_bit(rtwdev->mac_id_map, RTW_MAX_MAC_ID_NUM);
++	if (mac_id < RTW_MAX_MAC_ID_NUM)
++		set_bit(mac_id, rtwdev->mac_id_map);
++
++	return mac_id;
++}
++
+ static inline void rtw_release_macid(struct rtw_dev *rtwdev, u8 mac_id)
+ {
+ 	clear_bit(mac_id, rtwdev->mac_id_map);
+Alleen in src/: main.h.orig
+diff -u rtw88/pci.c src/pci.c
+--- rtw88/pci.c	2024-09-11 16:27:07.220588579 +0200
++++ src/pci.c	2024-09-11 15:54:47.010950020 +0200
 @@ -1691,7 +1691,7 @@
  	struct rtw_pci *rtwpci = (struct rtw_pci *)rtwdev->priv;
  
@@ -403,9 +565,9 @@ diff -u a/pci.c b/pci.c
  	netif_napi_add(&rtwpci->netdev, &rtwpci->napi, rtw_pci_napi_poll);
  #else
  	netif_napi_add(&rtwpci->netdev, &rtwpci->napi, rtw_pci_napi_poll,
-diff -u a/ps.c b/ps.c
---- a/ps.c	2024-08-28 09:18:53.607276715 +0200
-+++ b/ps.c	2024-08-27 19:42:23.009407218 +0200
+diff -u rtw88/ps.c src/ps.c
+--- rtw88/ps.c	2024-09-11 16:27:07.220588579 +0200
++++ src/ps.c	2024-09-11 15:54:47.010950020 +0200
 @@ -334,7 +334,7 @@
  		__rtw_vif_recalc_lps(&data, new_vif);
  	rtw_iterate_vifs(rtwdev, rtw_vif_recalc_lps_iter, &data);
@@ -415,10 +577,20 @@ diff -u a/ps.c b/ps.c
  	if (data.count == 1 && data.found_vif->cfg.ps) {
  		rtwdev->ps_enabled = true;
  	} else {
-diff -u a/tx.c b/tx.c
---- a/tx.c	2024-08-28 09:18:53.616276748 +0200
-+++ b/tx.c	2024-08-27 19:42:23.009407218 +0200
-@@ -94,7 +94,7 @@
+diff -u rtw88/tx.c src/tx.c
+--- rtw88/tx.c	2024-09-11 16:27:07.227255462 +0200
++++ src/tx.c	2024-09-11 15:54:47.010950020 +0200
+@@ -47,7 +47,8 @@
+ 		      le32_encode_bits(pkt_info->ls, RTW_TX_DESC_W0_LS) |
+ 		      le32_encode_bits(pkt_info->dis_qselseq, RTW_TX_DESC_W0_DISQSELSEQ);
+ 
+-	tx_desc->w1 = le32_encode_bits(pkt_info->qsel, RTW_TX_DESC_W1_QSEL) |
++	tx_desc->w1 = le32_encode_bits(pkt_info->mac_id, RTW_TX_DESC_W1_MACID) |
++		      le32_encode_bits(pkt_info->qsel, RTW_TX_DESC_W1_QSEL) |
+ 		      le32_encode_bits(pkt_info->rate_id, RTW_TX_DESC_W1_RATE_ID) |
+ 		      le32_encode_bits(pkt_info->sec_type, RTW_TX_DESC_W1_SEC_TYPE) |
+ 		      le32_encode_bits(pkt_info->pkt_offset, RTW_TX_DESC_W1_PKT_OFFSET) |
+@@ -94,7 +95,7 @@
  
  static u8 get_tx_ampdu_factor(struct ieee80211_sta *sta)
  {
@@ -427,7 +599,7 @@ diff -u a/tx.c b/tx.c
  	u8 exp = sta->deflink.ht_cap.ampdu_factor;
  #else
  	u8 exp = sta->ht_cap.ampdu_factor;
-@@ -109,7 +109,7 @@
+@@ -109,7 +110,7 @@
  
  static u8 get_tx_ampdu_density(struct ieee80211_sta *sta)
  {
@@ -436,7 +608,7 @@ diff -u a/tx.c b/tx.c
  	return sta->deflink.ht_cap.ampdu_density;
  #else
  	return sta->ht_cap.ampdu_density;
-@@ -121,7 +121,7 @@
+@@ -121,7 +122,7 @@
  {
  	u8 rate;
  
@@ -445,7 +617,7 @@ diff -u a/tx.c b/tx.c
  	if (rtwdev->hal.rf_type == RF_2T2R && sta->deflink.ht_cap.mcs.rx_mask[1] != 0)
  #else
  	if (rtwdev->hal.rf_type == RF_2T2R && sta->ht_cap.mcs.rx_mask[1] != 0)
-@@ -140,7 +140,7 @@
+@@ -140,7 +141,7 @@
  	u8 rate;
  	u16 tx_mcs_map;
  
@@ -454,7 +626,7 @@ diff -u a/tx.c b/tx.c
  	tx_mcs_map = le16_to_cpu(sta->deflink.vht_cap.vht_mcs.tx_mcs_map);
  #else
  	tx_mcs_map = le16_to_cpu(sta->vht_cap.vht_mcs.tx_mcs_map);
-@@ -386,7 +386,7 @@
+@@ -386,7 +387,7 @@
  	if (info->control.use_rts || skb->len > hw->wiphy->rts_threshold)
  		pkt_info->rts = true;
  
@@ -463,3 +635,36 @@ diff -u a/tx.c b/tx.c
  	if (sta->deflink.vht_cap.vht_supported)
  		rate = get_highest_vht_tx_rate(rtwdev, sta);
  	else if (sta->deflink.ht_cap.ht_supported)
+@@ -440,14 +441,18 @@
+ 	const struct rtw_chip_info *chip = rtwdev->chip;
+ 	struct ieee80211_tx_info *info = IEEE80211_SKB_CB(skb);
+ 	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)skb->data;
++	struct ieee80211_vif *vif = info->control.vif;
+ 	struct rtw_sta_info *si;
+-	struct ieee80211_vif *vif = NULL;
++	struct rtw_vif *rtwvif;
+ 	__le16 fc = hdr->frame_control;
+ 	bool bmc;
+ 
+ 	if (sta) {
+ 		si = (struct rtw_sta_info *)sta->drv_priv;
+-		vif = si->vif;
++		pkt_info->mac_id = si->mac_id;
++	} else if (vif) {
++		rtwvif = (struct rtw_vif *)vif->drv_priv;
++		pkt_info->mac_id = rtwvif->mac_id;
+ 	}
+ 
+ 	if (ieee80211_is_mgmt(fc) || ieee80211_is_nullfunc(fc))
+Alleen in src/: tx.c.orig
+diff -u rtw88/tx.h src/tx.h
+--- rtw88/tx.h	2024-09-11 16:27:07.227255462 +0200
++++ src/tx.h	2024-09-11 15:52:23.802956877 +0200
+@@ -27,6 +27,7 @@
+ #define RTW_TX_DESC_W0_BMC BIT(24)
+ #define RTW_TX_DESC_W0_LS BIT(26)
+ #define RTW_TX_DESC_W0_DISQSELSEQ BIT(31)
++#define RTW_TX_DESC_W1_MACID GENMASK(7, 0)
+ #define RTW_TX_DESC_W1_QSEL GENMASK(12, 8)
+ #define RTW_TX_DESC_W1_RATE_ID GENMASK(20, 16)
+ #define RTW_TX_DESC_W1_SEC_TYPE GENMASK(23, 22)
