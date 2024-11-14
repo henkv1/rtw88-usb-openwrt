@@ -13,4 +13,4 @@ The kernel module package is named kmod-rtw88-usb_* and you can find it in the b
 
 Please note that you need to install both packages for your device to make the module work.
 
-NOTE: This package makes use of the 'unofficial' RTW88 development tree https://github.com/lwfinger/rtw88. I noticed an issue with the connection speed using this version on at least RTL88x2BU and RTL88x1CU. So I created a separate package for these adapters based on the wireless-next code. You can find it here: https://github.com/henkv1/openwrt-rtw-next
+NOTE: This package makes use of the 'unofficial' RTW88 development tree https://github.com/lwfinger/rtw88.
