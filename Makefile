@@ -45,7 +45,9 @@ define KernelPackage/rtw88-usb
 	$(PKG_BUILD_DIR)/rtw_8822bu.ko \
 	$(PKG_BUILD_DIR)/rtw_8821c.ko \
 	$(PKG_BUILD_DIR)/rtw_8821cu.ko \
+	$(PKG_BUILD_DIR)/rtw_88xxa.ko \
 	$(PKG_BUILD_DIR)/rtw_8821a.ko \
+	$(PKG_BUILD_DIR)/rtw_8812a.ko \
 	$(PKG_BUILD_DIR)/rtw_8821au.ko \
 	$(PKG_BUILD_DIR)/rtw_8812au.ko \
 	$(PKG_BUILD_DIR)/rtw_8723d.ko \
