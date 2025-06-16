@@ -1,458 +1,328 @@
-Gemeenschappelijke submappen: rtw88-2/alt_rtl8821ce en rtw88/alt_rtl8821ce
-diff -u rtw88-2/bf.c rtw88/bf.c
---- rtw88-2/bf.c	2024-11-14 15:48:16.053633871 +0100
-+++ rtw88/bf.c	2024-11-14 15:48:45.610301106 +0100
-@@ -57,7 +57,7 @@
- 	}
- 
- 	ic_vht_cap = &hw->wiphy->bands[NL80211_BAND_5GHZ]->vht_cap;
--#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 0) && !defined(OPENWRT)
- 	vht_cap = &sta->vht_cap;
- #else
- 	vht_cap = &sta->deflink.vht_cap;
-@@ -75,7 +75,7 @@
+Index: rtw88/bf.c
+===================================================================
+--- rtw88.orig/bf.c
++++ rtw88/bf.c
+@@ -75,7 +75,7 @@ void rtw_bf_assoc(struct rtw_dev *rtwdev
  		ether_addr_copy(bfee->mac_addr, bssid);
  		bfee->role = RTW_BFEE_MU;
  		bfee->p_aid = (bssid[5] << 1) | (bssid[4] >> 7);
 -#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0) || defined(OPENWRT)
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)) || defined (OPENWRT)
  		bfee->aid = vif->cfg.aid;
  #else
  		bfee->aid = bss_conf->aid;
-Gemeenschappelijke submappen: rtw88-2/dkms en rtw88/dkms
-Gemeenschappelijke submappen: rtw88-2/firmware en rtw88/firmware
-diff -u rtw88-2/fw.c rtw88/fw.c
---- rtw88-2/fw.c	2024-11-14 15:48:16.056967204 +0100
-+++ rtw88/fw.c	2024-11-14 15:48:45.613634439 +0100
-@@ -196,7 +196,7 @@
+Index: rtw88/fw.c
+===================================================================
+--- rtw88.orig/fw.c
++++ rtw88/fw.c
+@@ -196,7 +196,7 @@ legacy:
  	si->ra_report.desc_rate = rate;
  	si->ra_report.bit_rate = bit_rate;
  
 -#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0) || defined(OPENWRT)
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)) || defined (OPENWRT)
  	sta->deflink.agg.max_rc_amsdu_len = get_max_amsdu_len(bit_rate);
  #else
  	sta->max_rc_amsdu_len = get_max_amsdu_len(bit_rate);
-@@ -734,7 +734,7 @@
- 	rtw_fw_send_h2c_command(rtwdev, h2c_pkt);
- }
- 
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 0) || defined(OPENWRT1)
- void rtw_fw_send_ra_info(struct rtw_dev *rtwdev, struct rtw_sta_info *si,
- 			 bool reset_ra_mask)
- #else
-@@ -743,7 +743,7 @@
- {
- 	u8 h2c_pkt[H2C_PKT_SIZE] = {0};
- 	bool disable_pt = true;
--#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 18, 0)
-+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 18, 0) || defined(OPENWRT1)
- 	bool reset_ra_mask = true;
- #endif
- 
-@@ -1242,7 +1242,7 @@
+@@ -1257,7 +1257,7 @@ static struct sk_buff *rtw_get_rsvd_page
  
  	switch (rsvd_pkt->type) {
  	case RSVD_BEACON:
 -#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)) || defined(OPENWRT)
++#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))) || defined (OPENWRT)
  		skb_new = ieee80211_beacon_get_tim(hw, vif, &tim_offset, NULL, 0);
  #else
  		skb_new = ieee80211_beacon_get_tim(hw, vif, &tim_offset, NULL);
-@@ -1257,7 +1257,7 @@
+@@ -1272,7 +1272,7 @@ static struct sk_buff *rtw_get_rsvd_page
  		break;
  	case RSVD_NULL:
  #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 17)
 -#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0) || defined(OPENWRT)
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)) || defined (OPENWRT)
  		skb_new = ieee80211_nullfunc_get(hw, vif, -1, false);
  #else
  		skb_new = ieee80211_nullfunc_get(hw, vif, false);
-@@ -1268,7 +1268,7 @@
+@@ -1283,7 +1283,7 @@ static struct sk_buff *rtw_get_rsvd_page
  		break;
  	case RSVD_QOS_NULL:
  #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 17)
 -#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0) || defined(OPENWRT)
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0)) || defined (OPENWRT)
  		skb_new = ieee80211_nullfunc_get(hw, vif, -1, true);
  #else
  		skb_new = ieee80211_nullfunc_get(hw, vif, true);
-diff -u rtw88-2/fw.h rtw88/fw.h
---- rtw88-2/fw.h	2024-11-14 15:48:16.056967204 +0100
-+++ rtw88/fw.h	2024-11-14 15:48:45.613634439 +0100
-@@ -846,7 +846,7 @@
+Index: rtw88/mac80211.c
+===================================================================
+--- rtw88.orig/mac80211.c
++++ rtw88/mac80211.c
+@@ -64,7 +64,7 @@ static int rtw_ops_start(struct ieee8021
+ 	return ret;
+ }
  
- void rtw_fw_bt_wifi_control(struct rtw_dev *rtwdev, u8 op_code, u8 *data);
- void rtw_fw_send_rssi_info(struct rtw_dev *rtwdev, struct rtw_sta_info *si);
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 0) || defined(OPENWRT1)
- void rtw_fw_send_ra_info(struct rtw_dev *rtwdev, struct rtw_sta_info *si,
- 			 bool reset_ra_mask);
+-#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 11, 0))
++#if ((LINUX_VERSION_CODE < KERNEL_VERSION(6, 11, 0))) && !defined (OPENWRT)
+ static void rtw_ops_stop(struct ieee80211_hw *hw)
  #else
-Gemeenschappelijke submappen: rtw88-2/.git en rtw88/.git
-diff -u rtw88-2/mac80211.c rtw88/mac80211.c
---- rtw88-2/mac80211.c	2024-11-14 15:48:16.056967204 +0100
-+++ rtw88/mac80211.c	2024-11-14 15:48:45.613634439 +0100
-@@ -378,7 +378,7 @@
+ static void rtw_ops_stop(struct ieee80211_hw *hw, bool suspend)
+@@ -378,7 +378,7 @@ static void rtw_conf_tx(struct rtw_dev *
  static void rtw_ops_bss_info_changed(struct ieee80211_hw *hw,
  				     struct ieee80211_vif *vif,
  				     struct ieee80211_bss_conf *conf,
 -#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)) || defined(OPENWRT)
++#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))) || defined (OPENWRT)
  				     u64 changed)
  #else
  				     u32 changed)
-@@ -396,7 +396,7 @@
+@@ -396,7 +396,7 @@ static void rtw_ops_bss_info_changed(str
  
  	if (changed & BSS_CHANGED_ASSOC) {
  		rtw_vif_assoc_changed(rtwvif, conf);
 -#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)) || defined(OPENWRT)
++#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))) || defined (OPENWRT)
  		if (vif->cfg.assoc) {
  #else
  		if (conf->assoc) {
-@@ -405,7 +405,7 @@
+@@ -405,7 +405,7 @@ static void rtw_ops_bss_info_changed(str
  			rtw_fw_download_rsvd_page(rtwdev);
  			rtw_send_rsvd_page_h2c(rtwdev);
  			rtw_fw_default_port(rtwdev, rtwvif);
 -#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)) || defined(OPENWRT)
++#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))) || defined (OPENWRT)
  			rtw_coex_media_status_notify(rtwdev, vif->cfg.assoc);
  #else
  			rtw_coex_media_status_notify(rtwdev, conf->assoc);
-@@ -474,7 +474,7 @@
+@@ -476,7 +476,7 @@ static void rtw_ops_bss_info_changed(str
  	mutex_unlock(&rtwdev->mutex);
  }
  
 -#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)) || defined(OPENWRT)
++#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))) || defined (OPENWRT)
  static int rtw_ops_start_ap(struct ieee80211_hw *hw,
  			    struct ieee80211_vif *vif,
  			    struct ieee80211_bss_conf *link_conf)
-@@ -495,7 +495,7 @@
+@@ -497,7 +497,7 @@ static int rtw_ops_start_ap(struct ieee8
  	return 0;
  }
  
 -#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)) || defined(OPENWRT)
++#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))) || defined (OPENWRT)
  static void rtw_ops_stop_ap(struct ieee80211_hw *hw,
  			    struct ieee80211_vif *vif,
  			    struct ieee80211_bss_conf *link_conf)
-@@ -516,7 +516,7 @@
+@@ -518,7 +518,7 @@ static void rtw_ops_stop_ap(struct ieee8
  
  static int rtw_ops_conf_tx(struct ieee80211_hw *hw,
  			   struct ieee80211_vif *vif,
 -#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)) || defined(OPENWRT)
++#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))) || defined (OPENWRT)
  			   unsigned int link_id, u16 ac,
  #else
  			   u16 ac,
-@@ -745,7 +745,7 @@
- #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 18, 0)
- static void rtw_ops_mgd_prepare_tx(struct ieee80211_hw *hw,
- 				   struct ieee80211_vif *vif,
--    #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0))
-+    #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0)) || defined(OPENWRT)
- 				   struct ieee80211_prep_tx_info *info)
-     #else
- 				   u16 duration)
-diff -u rtw88-2/main.c rtw88/main.c
---- rtw88-2/main.c	2024-11-14 15:48:16.056967204 +0100
-+++ rtw88/main.c	2024-11-14 15:48:45.613634439 +0100
-@@ -193,7 +193,7 @@
+@@ -990,7 +990,7 @@ static int rtw_ops_set_sar_specs(struct
+ 
+ static void rtw_ops_sta_rc_update(struct ieee80211_hw *hw,
+ 				  struct ieee80211_vif *vif,
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 13, 0)
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 13, 0))
+ 				  struct ieee80211_sta *sta, u32 changed)
+ #else
+ 				  struct ieee80211_link_sta *link_sta,
+@@ -1008,7 +1008,7 @@ static void rtw_ops_sta_rc_update(struct
+ }
+ 
+ const struct ieee80211_ops rtw_ops = {
+-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 9, 0)
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 9, 0)) || defined (OPENWRT)
+ 	.add_chanctx = ieee80211_emulate_add_chanctx,
+ 	.remove_chanctx = ieee80211_emulate_remove_chanctx,
+ 	.change_chanctx = ieee80211_emulate_change_chanctx,
+Index: rtw88/main.c
+===================================================================
+--- rtw88.orig/main.c
++++ rtw88/main.c
+@@ -194,7 +194,7 @@ static void rtw_vif_watch_dog_iter(void
  	struct rtw_vif *rtwvif = (struct rtw_vif *)vif->drv_priv;
  
  	if (vif->type == NL80211_IFTYPE_STATION)
 -#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0) || defined(OPENWRT)
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)) || defined (OPENWRT)
  		if (vif->cfg.assoc)
  #else
  		if (vif->bss_conf.assoc)
-@@ -587,7 +587,7 @@
+@@ -588,7 +588,7 @@ EXPORT_SYMBOL(rtw_dump_reg);
  void rtw_vif_assoc_changed(struct rtw_vif *rtwvif,
  			   struct ieee80211_bss_conf *conf)
  {
 -#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0) || defined(OPENWRT)
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)) || defined (OPENWRT)
  	struct ieee80211_vif *vif = NULL;
  
  	if (conf)
-@@ -1017,7 +1017,7 @@
- static u64 get_vht_ra_mask(struct ieee80211_sta *sta)
- {
- 	u64 ra_mask = 0;
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 	u16 mcs_map = le16_to_cpu(sta->deflink.vht_cap.vht_mcs.rx_mcs_map);
- #else
- 	u16 mcs_map = le16_to_cpu(sta->vht_cap.vht_mcs.rx_mcs_map);
-@@ -1241,26 +1241,26 @@
- 	bool is_vht_enable = false;
- 	bool is_support_sgi = false;
- 
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 	if (sta->deflink.vht_cap.vht_supported) {
- #else
- 	if (sta->vht_cap.vht_supported) {
- #endif
- 		is_vht_enable = true;
- 		ra_mask |= get_vht_ra_mask(sta);
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 		if (sta->deflink.vht_cap.cap & IEEE80211_VHT_CAP_RXSTBC_MASK)
- #else
- 		if (sta->vht_cap.cap & IEEE80211_VHT_CAP_RXSTBC_MASK)
- #endif
- 			stbc_en = VHT_STBC_EN;
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 		if (sta->deflink.vht_cap.cap & IEEE80211_VHT_CAP_RXLDPC)
- #else
- 		if (sta->vht_cap.cap & IEEE80211_VHT_CAP_RXLDPC)
- #endif
- 			ldpc_en = VHT_LDPC_EN;
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 	} else if (sta->deflink.ht_cap.ht_supported) {
- 		ra_mask |= (sta->deflink.ht_cap.mcs.rx_mask[1] << 20) |
- 			   (sta->deflink.ht_cap.mcs.rx_mask[0] << 12);
-@@ -1283,20 +1283,20 @@
- 		ra_mask &= RA_MASK_VHT_RATES_1SS | RA_MASK_HT_RATES_1SS;
- 
- 	if (hal->current_band_type == RTW_BAND_5G) {
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 		ra_mask |= (u64)sta->deflink.supp_rates[NL80211_BAND_5GHZ] << 4;
- #else
- 		ra_mask |= (u64)sta->supp_rates[NL80211_BAND_5GHZ] << 4;
- #endif
- 		ra_mask_bak = ra_mask;
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 		if (sta->deflink.vht_cap.vht_supported) {
- #else
- 		if (sta->vht_cap.vht_supported) {
- #endif
- 			ra_mask &= RA_MASK_VHT_RATES | RA_MASK_OFDM_IN_VHT;
- 			wireless_set = WIRELESS_OFDM | WIRELESS_VHT;
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 		} else if (sta->deflink.ht_cap.ht_supported) {
- #else
- 		} else if (sta->ht_cap.ht_supported) {
-@@ -1308,13 +1308,13 @@
- 		}
- 		dm_info->rrsr_val_init = RRSR_INIT_5G;
- 	} else if (hal->current_band_type == RTW_BAND_2G) {
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 		ra_mask |= sta->deflink.supp_rates[NL80211_BAND_2GHZ];
- #else
- 		ra_mask |= sta->supp_rates[NL80211_BAND_2GHZ];
- #endif
- 		ra_mask_bak = ra_mask;
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 		if (sta->deflink.vht_cap.vht_supported) {
- #else
- 		if (sta->vht_cap.vht_supported) {
-@@ -1323,7 +1323,7 @@
- 				   RA_MASK_OFDM_IN_VHT;
- 			wireless_set = WIRELESS_CCK | WIRELESS_OFDM |
- 				       WIRELESS_HT | WIRELESS_VHT;
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 		} else if (sta->deflink.ht_cap.ht_supported) {
- #else
- 		} else if (sta->ht_cap.ht_supported) {
-@@ -1332,7 +1332,7 @@
- 				   RA_MASK_OFDM_IN_HT_2G;
- 			wireless_set = WIRELESS_CCK | WIRELESS_OFDM |
- 				       WIRELESS_HT;
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 		} else if (sta->deflink.supp_rates[0] <= 0xf) {
- #else
- 		} else if (sta->supp_rates[0] <= 0xf) {
-@@ -1349,14 +1349,14 @@
- 		wireless_set = 0;
- 	}
- 
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 	switch (sta->deflink.bandwidth) {
- #else
- 	switch (sta->bandwidth) {
- #endif
- 	case IEEE80211_STA_RX_BW_80:
- 		bw_mode = RTW_CHANNEL_WIDTH_80;
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 		is_support_sgi = sta->deflink.vht_cap.vht_supported &&
- 				 (sta->deflink.vht_cap.cap & IEEE80211_VHT_CAP_SHORT_GI_80);
- #else
-@@ -1366,7 +1366,7 @@
- 		break;
- 	case IEEE80211_STA_RX_BW_40:
- 		bw_mode = RTW_CHANNEL_WIDTH_40;
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 		is_support_sgi = sta->deflink.ht_cap.ht_supported &&
- 				 (sta->deflink.ht_cap.cap & IEEE80211_HT_CAP_SGI_40);
- #else
-@@ -1376,7 +1376,7 @@
- 		break;
- 	default:
- 		bw_mode = RTW_CHANNEL_WIDTH_20;
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 		is_support_sgi = sta->deflink.ht_cap.ht_supported &&
- 				 (sta->deflink.ht_cap.cap & IEEE80211_HT_CAP_SGI_20);
- #else
-@@ -1386,14 +1386,14 @@
- 		break;
- 	}
- 
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 	if (sta->deflink.vht_cap.vht_supported && ra_mask & 0xffc00000) {
- #else
- 	if (sta->vht_cap.vht_supported && ra_mask & 0xffc00000) {
- #endif
- 		tx_num = 2;
- 		rf_type = RF_2T2R;
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 	} else if (sta->deflink.ht_cap.ht_supported && ra_mask & 0xfff00000) {
- #else
- 	} else if (sta->ht_cap.ht_supported && ra_mask & 0xfff00000) {
-@@ -1417,7 +1417,7 @@
- 	si->ra_mask = ra_mask;
- 	si->rate_id = rate_id;
- 
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 0) || defined(OPENWRT1)
- 	rtw_fw_send_ra_info(rtwdev, si, reset_ra_mask);
- #else
- 	rtw_fw_send_ra_info(rtwdev, si);
-@@ -1801,7 +1801,7 @@
+@@ -1790,7 +1790,7 @@ static void rtw_vif_smps_iter(void *data
  {
  	struct rtw_dev *rtwdev = (struct rtw_dev *)data;
  
 -#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0) || defined(OPENWRT)
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)) || defined (OPENWRT)
  	if (vif->type != NL80211_IFTYPE_STATION || !vif->cfg.assoc)
  #else
  	if (vif->type != NL80211_IFTYPE_STATION || !vif->bss_conf.assoc)
-@@ -1809,13 +1809,13 @@
+@@ -1798,13 +1798,13 @@ static void rtw_vif_smps_iter(void *data
  		return;
  
  	if (rtwdev->hal.txrx_1ss)
 -#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0) || defined(OPENWRT)
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)) || defined (OPENWRT)
  		ieee80211_request_smps(vif, 0, IEEE80211_SMPS_STATIC);
  #else
  		ieee80211_request_smps(vif, IEEE80211_SMPS_STATIC);
  #endif
  	else
 -#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0) || defined(OPENWRT)
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)) || defined (OPENWRT)
  		ieee80211_request_smps(vif, 0, IEEE80211_SMPS_OFF);
  #else
  		ieee80211_request_smps(vif, IEEE80211_SMPS_OFF);
-@@ -2545,7 +2545,7 @@
+@@ -2311,7 +2311,7 @@ void rtw_core_deinit(struct rtw_dev *rtw
+ 		release_firmware(wow_fw->firmware);
+ 
+ 	destroy_workqueue(rtwdev->tx_wq);
+-# if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 2, 0)
++# if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 2, 0)) || defined (OPENWRT)
+ 	timer_delete_sync(&rtwdev->tx_report.purge_timer);
+ # else
+ 	del_timer_sync(&rtwdev->tx_report.purge_timer);
+@@ -2542,7 +2542,7 @@ static void rtw_check_sta_active_iter(vo
  	if (vif->type != NL80211_IFTYPE_STATION)
  		return;
  
 -#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0) || defined(OPENWRT)
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)) || defined (OPENWRT)
  	if (vif->cfg.assoc || !is_zero_ether_addr(rtwvif->bssid))
  #else
  	if (vif->bss_conf.assoc || !is_zero_ether_addr(rtwvif->bssid))
-diff -u rtw88-2/main.h rtw88/main.h
---- rtw88-2/main.h	2024-11-14 15:48:16.060300538 +0100
-+++ rtw88/main.h	2024-11-14 15:48:45.613634439 +0100
-@@ -54,6 +54,8 @@
+Index: rtw88/main.h
+===================================================================
+--- rtw88.orig/main.h
++++ rtw88/main.h
+@@ -36,7 +36,9 @@
+ #define RHEL_RELEASE_VERSION(a, b) a<<8 & b
+ #endif
+ 
+-#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0))
++#define OPENWRT
++
++#if ((LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 0))) && !defined (OPENWRT)
+ /**
+  * abs_diff - return absolute value of the difference between the arguments
+  * @a: the first argument
+@@ -57,7 +59,7 @@
  })
  #endif
  
-+#define OPENWRT
-+
- #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)) && !defined (OPENWRT)
  /**
   * cfg80211_ssid_eq - compare two SSIDs
-diff -u rtw88-2/pci.c rtw88/pci.c
---- rtw88-2/pci.c	2024-11-14 15:48:16.060300538 +0100
-+++ rtw88/pci.c	2024-11-14 15:52:04.286971530 +0100
-@@ -1706,7 +1706,7 @@
+  * @a: first SSID
+@@ -2418,7 +2420,7 @@ bool rtw_core_check_sta_active(struct rt
+ void rtw_core_enable_beacon(struct rtw_dev *rtwdev, bool enable);
+ void rtw_set_ampdu_factor(struct rtw_dev *rtwdev, struct ieee80211_vif *vif,
+ 			  struct ieee80211_bss_conf *bss_conf);
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)) && !defined (OPENWRT)
+ static inline bool rtw_ssid_equal(struct cfg80211_ssid *a,
+                                  struct cfg80211_ssid *b)
+ {
+Index: rtw88/pci.c
+===================================================================
+--- rtw88.orig/pci.c
++++ rtw88/pci.c
+@@ -1617,7 +1617,7 @@ static const struct rtw_hci_ops rtw_pci_
+ 
+ static int rtw_pci_request_irq(struct rtw_dev *rtwdev, struct pci_dev *pdev)
+ {
+-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 10, 0))
++#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(6, 10, 0))) || defined (OPENWRT)
+ 	unsigned int flags = PCI_IRQ_INTX;
+ #else
+ 	unsigned int flags = PCI_IRQ_LEGACY;
+@@ -1694,7 +1694,7 @@ static int rtw_pci_napi_init(struct rtw_
+ {
+ 	struct rtw_pci *rtwpci = (struct rtw_pci *)rtwdev->priv;
+ 
+-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 0)
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 0)) || defined (OPENWRT)
+ 	rtwpci->netdev = alloc_netdev_dummy(0);
+ 	if (!rtwpci->netdev)
+ 		return -ENOMEM;
+@@ -1708,7 +1708,7 @@ static int rtw_pci_napi_init(struct rtw_
  #endif
  		, &rtwpci->napi
  		, rtw_pci_napi_poll
 -#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 1, 0)
-+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 1, 0) || !defined(OPENWRT)
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 1, 0)) && !defined (OPENWRT)
  		, NAPI_POLL_WEIGHT
  #endif
  	);
-diff -u rtw88-2/ps.c rtw88/ps.c
---- rtw88-2/ps.c	2024-11-14 15:48:16.060300538 +0100
-+++ rtw88/ps.c	2024-11-14 15:48:45.613634439 +0100
-@@ -334,7 +334,7 @@
+@@ -1721,7 +1721,7 @@ static void rtw_pci_napi_deinit(struct r
+ 
+ 	rtw_pci_napi_stop(rtwdev);
+ 	netif_napi_del(&rtwpci->napi);
+-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 0)
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 0)) || defined (OPENWRT)
+ 	free_netdev(rtwpci->netdev);
+ #endif
+ }
+Index: rtw88/pci.h
+===================================================================
+--- rtw88.orig/pci.h
++++ rtw88/pci.h
+@@ -215,7 +215,7 @@ struct rtw_pci {
+ 	bool running;
+ 
+ 	/* napi structure */
+-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 0)
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 0)) || defined (OPENWRT)
+ 	struct net_device *netdev;
+ #else
+ 	struct net_device netdev;
+Index: rtw88/ps.c
+===================================================================
+--- rtw88.orig/ps.c
++++ rtw88/ps.c
+@@ -334,7 +334,7 @@ void rtw_recalc_lps(struct rtw_dev *rtwd
  		__rtw_vif_recalc_lps(&data, new_vif);
  	rtw_iterate_vifs(rtwdev, rtw_vif_recalc_lps_iter, &data);
  
 -#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0)) || defined(OPENWRT)
++#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(6, 0, 0))) || defined (OPENWRT)
  	if (data.count == 1 && data.found_vif->cfg.ps) {
  		rtwdev->ps_enabled = true;
  	} else {
-diff -u rtw88-2/tx.c rtw88/tx.c
---- rtw88-2/tx.c	2024-11-14 15:48:16.066967205 +0100
-+++ rtw88/tx.c	2024-11-14 15:48:45.613634439 +0100
-@@ -95,7 +95,7 @@
+Index: rtw88/rtw8703b.c
+===================================================================
+--- rtw88.orig/rtw8703b.c
++++ rtw88/rtw8703b.c
+@@ -586,7 +586,7 @@ static void rtw8703b_pwrtrack_init(struc
+ 	dm_info->txagc_remnant_ofdm[RF_PATH_A] = 0;
+ }
  
- static u8 get_tx_ampdu_factor(struct ieee80211_sta *sta)
- {
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 	u8 exp = sta->deflink.ht_cap.ampdu_factor;
- #else
- 	u8 exp = sta->ht_cap.ampdu_factor;
-@@ -110,7 +110,7 @@
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 3, 0)
++#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 3, 0)) && !defined (OPENWRT)
+ #define FIELD_PREP_CONST FIELD_PREP
+ #endif
  
- static u8 get_tx_ampdu_density(struct ieee80211_sta *sta)
- {
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 	return sta->deflink.ht_cap.ampdu_density;
- #else
- 	return sta->ht_cap.ampdu_density;
-@@ -122,7 +122,7 @@
- {
- 	u8 rate;
+Index: rtw88/rx.c
+===================================================================
+--- rtw88.orig/rx.c
++++ rtw88/rx.c
+@@ -182,7 +182,7 @@ void rtw_update_rx_freq_from_ie(struct r
+ 	else
+ 		goto fill_rx_status;
  
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 	if (rtwdev->hal.rf_type == RF_2T2R && sta->deflink.ht_cap.mcs.rx_mask[1] != 0)
- #else
- 	if (rtwdev->hal.rf_type == RF_2T2R && sta->ht_cap.mcs.rx_mask[1] != 0)
-@@ -141,7 +141,7 @@
- 	u8 rate;
- 	u16 tx_mcs_map;
- 
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 	tx_mcs_map = le16_to_cpu(sta->deflink.vht_cap.vht_mcs.tx_mcs_map);
- #else
- 	tx_mcs_map = le16_to_cpu(sta->vht_cap.vht_mcs.tx_mcs_map);
-@@ -400,7 +400,7 @@
- 	if (info->control.use_rts || skb->len > hw->wiphy->rts_threshold)
- 		pkt_info->rts = true;
- 
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0)
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 19, 0) || defined(OPENWRT)
- 	if (sta->deflink.vht_cap.vht_supported)
- 		rate = get_highest_vht_tx_rate(rtwdev, sta);
- 	else if (sta->deflink.ht_cap.ht_supported)
+-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 4, 0))
++#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(6, 4, 0))) || defined (OPENWRT)
+ 	channel_number = cfg80211_get_ies_channel_number(variable, ielen,
+ 							 NL80211_BAND_2GHZ);
+ #elif (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 17, 0))
